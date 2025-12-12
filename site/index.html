@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CatchThePhish — Demo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { font-family: system-ui, -apple-system, Roboto, Arial; max-width:720px; margin:40px auto; padding:16px; }
+    h1 { margin-bottom:8px; }
+    .box { padding:12px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+    input[type=text] { width:100%; padding:10px; font-size:16px; margin-bottom:8px; box-sizing:border-box; }
+    button { padding:10px 14px; font-size:16px; cursor:pointer; }
+    #result { margin-top:12px; font-weight:600; font-size:18px; }
+    .why { margin-top:8px; color:#444; font-size:13px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>CatchThePhish — Demo</h1>
+    <p>Paste a URL and press Check. Prediction runs in your browser — no URL leaves your device.</p>
+
+    <input id="urlInput" type="text" placeholder="e.g. https://example.com/login">
+    <div style="display:flex;gap:8px">
+      <button id="btnCheck">Check</button>
+      <button id="btnClear">Clear</button>
+    </div>
+
+    <div id="result"></div>
+    <div id="explain" class="why"></div>
+  </div>
+
+  <script src="js/feature_extractor.js"></script>
+  <script src="js/model_runner.js"></script>
+  <script>
+    let MODEL = null;
+    fetch('model_rules.json').then(r => r.json()).then(m => { MODEL = m; console.log('Model loaded with', m.trees.length, 'trees') });
+
+    document.getElementById('btnCheck').addEventListener('click', () => {
+      const url = document.getElementById('urlInput').value.trim();
+      if (!url) return;
+      if (!MODEL) {
+        alert('Model not loaded yet, try again in a second');
+        return;
+      }
+      const features = extractLexicalFeatures(url);
+      const prob = predictForest(MODEL, features);
+      const out = probToLabel(prob);
+      document.getElementById('result').innerText = `${out.label} — ${(prob*100).toFixed(1)}%`;
+      document.getElementById('result').style.color = out.color;
+
+      // simple explanation: show top suspicious features
+      const reasons = [];
+      if (features.length > 75) reasons.push('Long URL');
+      if (features.contains_at) reasons.push('Contains @');
+      if (features.count_dots > 3) reasons.push('Many subdomains');
+      if (features.has_ip) reasons.push('IP address in host');
+      if (features.ratio_digits > 0.2) reasons.push('Lots of digits');
+      document.getElementById('explain').innerText = reasons.length ? 'Why: ' + reasons.join(', ') : '';
+    });
+
+    document.getElementById('btnClear').addEventListener('click', ()=> {
+      document.getElementById('urlInput').value = '';
+      document.getElementById('result').innerText = '';
+      document.getElementById('explain').innerText = '';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CatchThePhish</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card" role="dialog" aria-label="CatchThePhish popup">
+    <h1>CatchThePhish</h1>
+
+    <div class="row">
+      <input id="url" type="text" placeholder="Paste URL or use current tab" aria-label="URL input" />
+    </div>
+
+    <div class="controls">
+      <button id="btnUseTab" class="btn" title="Use current tab URL">Use tab</button>
+      <button id="btnCheck" class="btn primary" title="Check the URL">Check</button>
+      <button id="btnCopy" class="btn icon" title="Copy URL">Copy</button>
+      <button id="btnOpen" class="btn icon" title="Open URL">Open</button>
+    </div>
+
+    <div class="status" id="statusBlock" role="status" aria-live="polite">
+      <div class="ring" id="ringWrap" aria-hidden="true"></div>
+
+      <div style="flex:1;min-width:0">
+        <div id="statusText" class="label">Waiting for URL…</div>
+        <div id="explain" class="why"></div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="small">Local prediction — no data sent</div>
+      <a id="report" class="small" href="#" target="_blank" rel="noopener">Report</a>
+    </div>
+  </div>
+
+  <script src="js/feature_extractor.js"></script>
+  <script src="js/model_runner.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
